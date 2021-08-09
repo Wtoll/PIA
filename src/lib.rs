@@ -1,6 +1,6 @@
+#![allow(incomplete_features)]
 #![feature(const_generics)]
 #![feature(const_evaluatable_checked)]
-#![feature(int_bits_const)]
 
 #![allow(unused_parens)]
 
@@ -19,6 +19,11 @@
 
 extern crate log;
 use log::warn;
+
+#[cfg(feature = "serde")]
+extern crate serde;
+#[cfg(feature = "serde")]
+use serde::{Serialize, Deserialize};
 
 /// A helper function to determine the minimum amount of `u8`s that are needed in order to house `size` amount of items each of
 /// `bits` amount of bits.
@@ -44,6 +49,7 @@ pub const fn get_array_length(bits: u8, size: usize) -> usize {
 /// assert_eq!(packed_array.get(3), 7);
 /// ```
 #[derive(Debug, Eq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[repr(transparent)]
 pub struct PackedIntegerArray<const BITS: u8, const LEN: usize>
 where [u8; get_array_length(BITS, LEN)]: Sized {
@@ -57,7 +63,7 @@ where [u8; get_array_length(BITS, LEN)]: Sized {
     /// ```rust
     /// // Constructs a new packed integer array with 9 items and 3 bits per item
     /// // All total this is wrapped array of 4 `u8`s because (9 * 3)/8 rounds up to 4
-    /// let packed_array = pia::PackedIntegerArray::<3, 9>::new(); 
+    /// let mut packed_array = pia::PackedIntegerArray::<3, 9>::new(); 
     ///
     /// packed_array.set(3, 7);
     /// assert_eq!(packed_array.get(3), 7);
